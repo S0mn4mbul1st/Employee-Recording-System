@@ -19,7 +19,8 @@ class Service:
             # create the table
             query = '''CREATE TABLE activities (
 				id INTEGER PRIMARY KEY,
-				EmployeeID STRING NOT NULL,
+				activity STRING NOT NULL,
+				EmployeeID STRING,
 				start_time LONG NOT NULL,
 				end_time LONG
 				)'''
@@ -46,7 +47,7 @@ class Service:
         if row:
             self._record_id = int(row[0])
             self.last_activity = str(row[1])
-            self.last_start_time = int(row[2])
+            self.last_start_time = str(row[2])
             # check if the activity is ended
             if row[3] is None:
                 # the activity is "running"
@@ -107,36 +108,37 @@ class Service:
         self._record_id = None
 
         # calculate the activity time
-        seconds = timestamp - self.last_start_time
+        seconds = timestamp - int(self.last_start_time)
         return "INFO: " + ended_activity + " takes " + Service._durationstring(seconds) + " seconds"
 
     def deleteAct(self, ID):
-        self._cursor.execute("""delete from activities where activity = ?""", ID)
+        self._cursor.execute("""DELETE FROM activities WHERE activity = ?""", ID)
         self._connection.commit()
 
     def editID(self, ID, newID):
         #print(ID, newID)
-        self._cursor.execute('UPDATE activities SET id=? WHERE id=?', (ID, newID))
+        self._cursor.execute("""UPDATE activities SET activity = ? WHERE activity = ?""", (newID, ID))
         self._connection.commit()
 
 
 
-    def activities(self, mode='day', limit=100):
-        interval = 60 * 60 * 24 * 360 * 100
-        if mode == 'day':
-            interval = 60 * 60 * 24
-        elif mode == 'week':
-            interval = 60 * 60 * 24 * 7
-        elif mode == 'month':
-            interval = 60 * 60 * 24 * 30
-        elif mode == 'year':
-            interval = 60 * 60 * 24 * 360
-        elif mode == 'hour':
-            interval = 60 * 60
+    def activities(self, limit=100):
+        interval = 60 * 60 * 24
+        # if mode == 'day':
+        #     interval = 60 * 60 * 24
+        # elif mode == 'week':
+        #     interval = 60 * 60 * 24 * 7
+        # elif mode == 'month':
+        #     interval = 60 * 60 * 24 * 30
+        # elif mode == 'year':
+        #     interval = 60 * 60 * 24 * 360
+        # elif mode == 'hour':
+        #     interval = 60 * 60
 
         # exe query
         result = self._cursor.execute(
-            """SELECT id, activity, SUM(end_time - start_time) as duration, start_time/? as s_time
+            """SELECT id, activity, SUM(end_time - start_time) as duration, start_time/? as s_time,
+            start_time, end_time
             FROM activities 
             WHERE end_time IS NOT NULL
             GROUP BY activity, s_time
@@ -154,15 +156,19 @@ class Service:
             row = result.fetchone()
             if row is None:
                 break
-            if s_time != row[2] and row[2] is not None:
-                s_time = row[2]
+            if s_time != row[3] and row[3] is not None:
+                s_time = row[3]
                 date = datetime.fromtimestamp(s_time * interval)
                 result_string.append("\t --- from: {date} ---".format(date=date.isoformat()))
-
-            result_string.append("\t{id}\t{activity_name}\t\t\t{duration}".format(id=str(row[0]), activity_name=str(row[0]), duration=Service._durationstring(row[1])))
+            starting_time = datetime.fromtimestamp(float(row[4])).isoformat()
+            ending_time = datetime.fromtimestamp(float(row[5])).isoformat()
+            result_string.append("\t{id}\t{activity_name}\t\t\t{duration}\t{starting_time}\t{ending_time}".format(id=str(row[0]),
+                                                                                                                  activity_name=str(row[1]),
+                                                                                                                  duration=Service._durationstring(row[2]),
+                                                                                                                  starting_time=starting_time,
+                                                                                                                  ending_time=ending_time))
 
         return "\n".join(result_string)
-
 
     def _durationstring(duration):
         tmp = (60 * 60)
