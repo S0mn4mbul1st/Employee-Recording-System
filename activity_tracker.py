@@ -16,13 +16,13 @@ def listactivities(args):
 
 def helpf(args):
     return '''HELP:\n
-	\t- start, s [ACTIVITY]: start activity, if argument is missing then
+	\t- start [ACTIVITY]: start activity, if argument is missing then
 	\t\tlast activity starts (if any). If a different activity is running
 	\t\tthen this one will be stopped and the new one starts
 
 	\t- stop: stop the current activity (if any)
 
-	\t- list, l [group-by]: shows last activities grouped by \'gropu-by\'
+	\t- list [group-by]: shows last activities grouped by \'gropu-by\'
 	\t\tthat can be \'day\', \'week\' \'month\' or \'year\'
 
 	\t- help: shows this output
@@ -33,7 +33,7 @@ def helpf(args):
 				'''
 
 
-# ask to stop current acitivity
+
 def askstopifneeds():
     if service.current_activity:
         # ask to stop the current activity
@@ -41,15 +41,15 @@ def askstopifneeds():
             print('Q: do you want to stop the current activity named "' + service.current_activity + '"? [Y/N]')
             # read command
             command_line = sys.stdin.readline()
-            # execute the command
-            if (command_line == "y\n" or command_line == "Y\n"):
+
+            if (command_line == "y\n" or command_line == "Y\n" or command_line == "y" or command_line == "Y"):
                 print(service.stop())
                 break
-            elif (command_line == "n\n" or command_line == "N\n"):
+            elif (command_line == "n\n" or command_line == "N\n" or command_line == "n" or command_line == "N"):
                 break
 
 
-# exit application (ask to stop activity if needs)
+
 def exit(args):
     askstopifneeds()
 
@@ -57,13 +57,13 @@ def exit(args):
     sys.exit()
 
 
-# exit application (ask to stop activity if needs)
+
 def exit_immediately(args):
     service.dispose()
     sys.exit()
 
 
-# map command string with function
+
 actions = {
     "start": start,
     "stop"	:	stop,
@@ -79,21 +79,21 @@ while True:
 
     print ("Q: Commands: start [EmployeeID], stop, help, exit")
 
-    # read the command line and remove return char
+
     command_line = sys.stdin.readline()[:-1]
 
 
     if len(command_line) == 0:
         continue
 
-    # split the command line
+
     command = re.split("[ ]+", command_line)
 
     # search the command
     action = actions.get(command[0])
 
     if action:
-        # execute the command with arguments
+
         print (action(command[1:]))
     else:
         print ("ERROR: unknown command")

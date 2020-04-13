@@ -1,6 +1,5 @@
 import os.path
 from datetime import datetime
-# import datetime
 import sqlite3
 import math
 
@@ -84,7 +83,6 @@ class Service:
         # commit changes
         self._connection.commit()
 
-        # update cache
         self._updatecache()
 
         result_string += "INFO: " + activity + " started at " + date.isoformat()
@@ -124,6 +122,7 @@ class Service:
             interval = 60 * 60 * 24 * 360
         elif mode == 'hour':
             interval = 60 * 60
+
         # exe query
         result = self._cursor.execute(
             """SELECT activity, SUM(end_time - start_time) as duration, start_time/? as s_time
@@ -149,12 +148,11 @@ class Service:
                 date = datetime.fromtimestamp(s_time * interval)
                 result_string.append("\t --- from: {date} ---".format(date=date.isoformat()))
 
-            result_string.append("\t{activity_name}\t\t\t{duration}".format(activity_name=str(row[0]),
-                                                                            duration=Service._durationstring(row[1])))
+            result_string.append("\t{activity_name}\t\t\t{duration}".format(activity_name=str(row[0]), duration=Service._durationstring(row[1])))
 
         return "\n".join(result_string)
 
-    # format duration string
+
     def _durationstring(duration):
         tmp = (60 * 60)
         hours = math.floor(duration / tmp)
