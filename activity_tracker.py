@@ -11,8 +11,14 @@ def start(args):
 def stop(args):
     return service.stop()
 
+def remover(args):
+    return service.deleteAct(args)
+
 def listactivities(args):
     return service.activities(*args)
+
+def upd(args):
+    return service.editID(*args)
 
 def helpf(args):
     return '''HELP:\n
@@ -33,7 +39,6 @@ def helpf(args):
 				'''
 
 
-
 def askstopifneeds():
     if service.current_activity:
         # ask to stop the current activity
@@ -52,10 +57,8 @@ def askstopifneeds():
 
 def exit(args):
     askstopifneeds()
-
     service.dispose()
     sys.exit()
-
 
 
 def exit_immediately(args):
@@ -63,12 +66,12 @@ def exit_immediately(args):
     sys.exit()
 
 
-
 actions = {
     "start": start,
     "stop"	:	stop,
+    "update": upd,
     "list"	:	listactivities,
-    #"remove":   remover,
+    "deleteAct":   remover,
     "help"	:	helpf,
     "exit"	:	exit,
     "exit!"	:	exit_immediately
@@ -86,9 +89,10 @@ while True:
     if len(command_line) == 0:
         continue
 
+    #print(command_line)
 
     command = re.split("[ ]+", command_line)
-
+    #print(command[0], command[1])
     # search the command
     action = actions.get(command[0])
 

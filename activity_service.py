@@ -110,6 +110,17 @@ class Service:
         seconds = timestamp - self.last_start_time
         return "INFO: " + ended_activity + " takes " + Service._durationstring(seconds) + " seconds"
 
+    def deleteAct(self, ID):
+        self._cursor.execute("""delete from activities where activity = ?""", ID)
+        self._connection.commit()
+
+    def editID(self, ID, newID):
+        #print(ID, newID)
+        self._cursor.execute('UPDATE activities SET id=? WHERE id=?', (ID, newID))
+        self._connection.commit()
+
+
+
     def activities(self, mode='day', limit=100):
         interval = 60 * 60 * 24 * 360 * 100
         if mode == 'day':
@@ -125,7 +136,7 @@ class Service:
 
         # exe query
         result = self._cursor.execute(
-            """SELECT activity, SUM(end_time - start_time) as duration, start_time/? as s_time
+            """SELECT id, activity, SUM(end_time - start_time) as duration, start_time/? as s_time
             FROM activities 
             WHERE end_time IS NOT NULL
             GROUP BY activity, s_time
@@ -148,7 +159,7 @@ class Service:
                 date = datetime.fromtimestamp(s_time * interval)
                 result_string.append("\t --- from: {date} ---".format(date=date.isoformat()))
 
-            result_string.append("\t{activity_name}\t\t\t{duration}".format(activity_name=str(row[0]), duration=Service._durationstring(row[1])))
+            result_string.append("\t{id}\t{activity_name}\t\t\t{duration}".format(id=str(row[0]), activity_name=str(row[0]), duration=Service._durationstring(row[1])))
 
         return "\n".join(result_string)
 
