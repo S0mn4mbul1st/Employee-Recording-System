@@ -36,7 +36,7 @@ class Service:
             # is not the first time, an activity could exist
             self._updatecache()
 
-    # update cache values from db
+
     def _updatecache(self):
         result = self._cursor.execute(
             '''SELECT id, activity, start_time, end_time 
@@ -69,7 +69,7 @@ class Service:
                 # no current activity and no last activity, it is the "first time".
                 return "ERROR: no activity to start. Write an activity (e.g. start working)"
 
-        # if I have an other activity running, I need to stop it first!
+        # if I have an other activity running, I need to stop it first
         if self.current_activity and activity != self.current_activity:
             result_string += self.stop() + '\n'
         # if the activity to start is the same, do nothing
@@ -107,7 +107,6 @@ class Service:
         # and in cache
         self._record_id = None
 
-        # calculate the activity time
         seconds = timestamp - int(self.last_start_time)
         return "INFO: " + ended_activity + " takes " + Service._durationstring(seconds) + " seconds"
 
@@ -116,24 +115,11 @@ class Service:
         self._connection.commit()
 
     def editID(self, ID, newID):
-        #print(ID, newID)
         self._cursor.execute("""UPDATE activities SET activity = ? WHERE activity = ?""", (newID, ID))
         self._connection.commit()
 
-
-
     def activities(self, limit=100):
         interval = 60 * 60 * 24
-        # if mode == 'day':
-        #     interval = 60 * 60 * 24
-        # elif mode == 'week':
-        #     interval = 60 * 60 * 24 * 7
-        # elif mode == 'month':
-        #     interval = 60 * 60 * 24 * 30
-        # elif mode == 'year':
-        #     interval = 60 * 60 * 24 * 360
-        # elif mode == 'hour':
-        #     interval = 60 * 60
 
         # exe query
         result = self._cursor.execute(
@@ -146,12 +132,12 @@ class Service:
             LIMIT ?""", (interval, limit))
         result_string = []
         result_string.append(""
-                             "**************Employees' Working Hours**************")
+"**************Employees' Working Hours**************")
         s_time = None
-        # if exist, print the current_activity
+
         if self.current_activity is not None:
             result_string.append("\t{activity_name}\t\t\t(current)".format(activity_name=self.current_activity))
-        # if there are records in the database, print the duration for each activity
+
         while True:
             row = result.fetchone()
             if row is None:
