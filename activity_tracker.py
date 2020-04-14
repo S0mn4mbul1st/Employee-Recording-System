@@ -39,28 +39,51 @@ def helpf(args):
 	\t\tthe application while an activity is running and stop it at next usage.\n
 				'''
 
+
+def askstopifneeds():
+    if service.current_activity:
+        # ask to stop the current activity
+        while (True):
+            print('Q: do you want to stop the current activity named "' + service.current_activity + '"? [Y/N]')
+            # read command
+            command_line = sys.stdin.readline()
+
+            if (command_line == "y\n" or command_line == "Y\n" or command_line == "y" or command_line == "Y"):
+                print(service.stop())
+                break
+            elif (command_line == "n\n" or command_line == "N\n" or command_line == "n" or command_line == "N"):
+                break
+
 def exit(args):
+    askstopifneeds()
     service.dispose()
     sys.exit()
 
+
+def exit_immediately(args):
+    service.dispose()
+    sys.exit()
+
+
 actions = {
-    "b'start": start,
-    "b'stop'"	:	stop,
-    'b"update': upd,
-    "b'list'"	:	listactivities,
-    "b'deleteAct":   remover,
+    "start": start,
+    "stop"	:	stop,
+    "update": upd,
+    "list"	:	listactivities,
+    "deleteAct":   remover,
     "help"	:	helpf,
-    "exit"	:	exit
+    "exit"	:	exit,
+    "exit!"	:	exit_immediately
 }
 def on_connect(client, userData, flags, rc):
     print("Connected. Code: " + str(rc))
-    client.subscribe("work/records")
 
+    client.subscribe("work/records")
 def on_message(client, userData, msg):
-    print(msg.topic + ": " + str(msg.payload))
+    print(msg.topic + ": " + str(msg.payload.decode('utf-8')))
     print("Q: Commands: start [EmployeeID], stop, help, exit")
 
-    command_line = str(msg.payload)
+    command_line = str(msg.payload.decode('utf-8'))
 
     command = re.split("[ ]+", command_line)
 
@@ -75,5 +98,7 @@ def on_message(client, userData, msg):
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
+
 client.connect("test.mosquitto.org", 1883, 60)
+
 client.loop_forever()
