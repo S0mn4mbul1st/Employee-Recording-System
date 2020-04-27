@@ -1,8 +1,6 @@
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
+client = mqtt.Client()
 while True:
-    message = input("Please enter your message: ")
-    publish.single("work/records", message, hostname="test.mosquitto.org")
-    print("Command sent!")
 
-    #comment
+    client.publish("work/records")
