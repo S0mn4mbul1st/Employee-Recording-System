@@ -75,30 +75,41 @@ actions = {
     "exit"	:	exit,
     "exit!"	:	exit_immediately
 }
-def on_connect(client, userData, flags, rc):
-    print("Connected. Code: " + str(rc))
 
+def getCommands():
+ def on_connect(client, userData, flags, rc):
+    print("Connection is successful: " + str(rc))
     client.subscribe("work/records")
-def on_message(client, userData, msg):
+
+ def on_message(client, userData, msg):
     print(msg.topic + ": " + str(msg.payload.decode('utf-8')))
-    print("Q: Commands: start [EmployeeID], stop, help, exit")
-
     command_line = str(msg.payload.decode('utf-8'))
-
     command = re.split("[ ]+", command_line)
-
-    action = actions.get(command[0])
-
-    if action:
-        print(action(command[1:]))
+    chosenCommand = actions.get(command[0])
+    if chosenCommand:
+        print(chosenCommand(command[1:]))
     else:
         print("ERROR: unknown command")
 
 
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
+ client = mqtt.Client()
+ client.tls_set("ca.crt")
+ client.username_pw_set(username="testuser", password="testuser")
+ client.on_message = on_message
+ client.on_connect = on_connect
 
-client.connect("test.mosquitto.org", 1883, 60)
+ client.connect("DESKTOP-DTK1T07", 8883, 60)
+ while True:
+        message = input("Please enter your message: ")
+        client.publish("work/records", message)
+        command_line = message
+        command = re.split("[ ]+", command_line)
+        chosenCommand = actions.get(command[0])
+        if chosenCommand:
+            print(chosenCommand(command[1:]))
+        else:
+            print("ERROR!")
 
-client.loop_forever()
+ client.loop_forever()
+
+getCommands()
