@@ -12,33 +12,11 @@ def start(args):
 def stop(args):
     return service.stop()
 
-def remover(args):
-    return service.deleteAct(args)
-
 def listactivities(args):
     return service.activities(*args)
 
 def upd(args):
     return service.editID(*args)
-
-def helpf(args):
-    return '''HELP:\n
-	\t- start [ACTIVITY]: start activity, if argument is missing then
-	\t\tlast activity starts (if any). If a different activity is running
-	\t\tthen this one will be stopped and the new one starts
-
-	\t- stop: stop the current activity (if any)
-
-	\t- list [group-by]: shows last activities grouped by \'gropu-by\'
-	\t\tthat can be \'day\', \'week\' \'month\' or \'year\'
-
-	\t- help: shows this output
-
-	\t- exit: exits from this application. If an activity is running then
-	\t\tit asks if you want to stop the current activity. You can exit from
-	\t\tthe application while an activity is running and stop it at next usage.\n
-				'''
-
 
 def askstopifneeds():
     if service.current_activity:
@@ -68,12 +46,8 @@ def exit_immediately(args):
 actions = {
     "start": start,
     "stop"	:	stop,
-    "update": upd,
     "list"	:	listactivities,
-    "deleteAct":   remover,
-    "help"	:	helpf,
     "exit"	:	exit,
-    "exit!"	:	exit_immediately
 }
 
 def getCommands():
@@ -101,7 +75,7 @@ def getCommands():
 
  while True:
         message = input("Please enter your message: ")
-        client.publish("work/records", message)
+        client.publish("employee/records", message)
         command_line = message
         command = re.split("[ ]+", command_line)
         chosenCommand = actions.get(command[0])
